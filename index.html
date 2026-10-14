@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Техпарк</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Onest:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <g id="ex-base">
+    <rect x="28" y="88" width="104" height="24" rx="12" fill="var(--iron)"/>
+    <circle cx="44" cy="100" r="6" fill="var(--soft)"/><circle cx="116" cy="100" r="6" fill="var(--soft)"/>
+    <rect x="30" y="64" width="16" height="26" rx="3" fill="var(--iron)"/>
+    <rect x="40" y="62" width="84" height="28" rx="4" fill="var(--machine)"/>
+    <path d="M84 62V38h28l10 24z" fill="var(--machine)"/>
+    <path d="M90 60V45h18l6 15z" fill="var(--sky)"/>
+  </g>
+  <g id="ex-arm">
+    <path d="M118 66L152 28L176 62" stroke="var(--iron)" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M168 60L186 70L180 92L162 84z" fill="var(--iron)"/>
+  </g>
+  <g id="ex"><use href="#ex-base"/><use href="#ex-arm"/></g>
+  <g id="lo">
+    <rect x="56" y="62" width="100" height="30" rx="5" fill="var(--machine)"/>
+    <path d="M104 62V38h32l10 24z" fill="var(--machine)"/>
+    <path d="M110 60V44h20l7 16z" fill="var(--sky)"/>
+    <path d="M60 74L24 82" stroke="var(--iron)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M8 66h26l-4 30H12z" fill="var(--iron)"/>
+    <circle cx="76" cy="98" r="16" fill="var(--iron)"/><circle cx="76" cy="98" r="6" fill="var(--soft)"/>
+    <circle cx="140" cy="98" r="16" fill="var(--iron)"/><circle cx="140" cy="98" r="6" fill="var(--soft)"/>
+  </g>
+  <g id="cr">
+    <rect x="18" y="86" width="156" height="14" rx="3" fill="var(--iron)"/>
+    <rect x="18" y="62" width="38" height="26" rx="4" fill="var(--machine)"/>
+    <path d="M24 66h18v14H24z" fill="var(--sky)"/>
+    <rect x="62" y="70" width="104" height="16" fill="var(--machine)"/>
+    <path d="M70 72L166 14" stroke="var(--machine)" stroke-width="9" stroke-linecap="round"/>
+    <path d="M166 14V52" stroke="var(--iron)" stroke-width="2"/><rect x="162" y="52" width="8" height="8" fill="var(--iron)"/>
+    <circle cx="40" cy="104" r="10" fill="var(--iron)"/><circle cx="112" cy="104" r="10" fill="var(--iron)"/><circle cx="146" cy="104" r="10" fill="var(--iron)"/>
+  </g>
+  <g id="pu">
+    <rect x="14" y="86" width="160" height="12" rx="3" fill="var(--iron)"/>
+    <rect x="14" y="64" width="36" height="24" rx="4" fill="var(--machine)"/>
+    <path d="M20 68h18v12H20z" fill="var(--sky)"/>
+    <rect x="56" y="74" width="60" height="14" fill="var(--machine)"/>
+    <path d="M70 76L96 34L132 52L168 22" stroke="var(--machine)" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M168 22V60" stroke="var(--iron)" stroke-width="2"/>
+    <circle cx="36" cy="104" r="10" fill="var(--iron)"/><circle cx="116" cy="104" r="10" fill="var(--iron)"/><circle cx="148" cy="104" r="10" fill="var(--iron)"/>
+  </g>
+  <g id="ge">
+    <rect x="30" y="94" width="140" height="8" rx="2" fill="var(--iron)"/>
+    <rect x="36" y="44" width="128" height="52" rx="6" fill="var(--machine)"/>
+    <rect x="52" y="32" width="10" height="14" fill="var(--iron)"/>
+    <path d="M50 56h50M50 64h50M50 72h50M50 80h50" stroke="var(--iron)" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+    <rect x="116" y="54" width="40" height="32" rx="3" fill="var(--iron)"/>
+    <circle cx="128" cy="66" r="4" fill="var(--sky)"/><circle cx="144" cy="66" r="4" fill="var(--accent)"/><rect x="124" y="75" width="24" height="5" rx="2" fill="var(--sky)"/>
+  </g>
+</defs></svg>
+
+<div class="modal" id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle"></div></div>
+
+<div class="wrap">
+  <header class="top" id="top">
+    <div class="brand" id="brandName"></div>
+    <a class="phone js-phone" aria-label="Позвонить"></a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Меню"><span></span><span></span><span></span></button>
+    <div class="addr" id="addrBar" hidden>
+      <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      <span><b class="js-addr"></b></span>
+    </div>
+    <nav id="menu" aria-label="Разделы"><a href="#park">Техника</a><a href="#how">Как арендовать</a><a href="#terms">Условия</a><a href="#faq">Вопросы</a><a href="#order">Контакты</a></nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1 id="heroTitle"></h1>
+      <p id="heroText"></p>
+      <div class="cta"><a class="btn" href="#park">Смотреть технику</a><a class="btn ghost" href="#order">Помогите выбрать</a></div>
+    </div>
+    <svg class="scene" id="scene" viewBox="0 0 560 360" role="img" aria-label="Экскаватор и автокран на стройплощадке">
+      <rect width="560" height="360" fill="var(--sky)"/>
+      <circle cx="465" cy="82" r="34" fill="var(--machine)" opacity=".85"/>
+      <g class="clouds"><animateTransform attributeName="transform" type="translate" values="0 0;40 0;0 0" dur="48s" repeatCount="indefinite"/><ellipse cx="120" cy="70" rx="52" ry="14" fill="#ffffff" opacity=".8"/><ellipse cx="150" cy="58" rx="34" ry="12" fill="#ffffff" opacity=".8"/>
+      <ellipse cx="330" cy="120" rx="44" ry="11" fill="#ffffff" opacity=".7"/></g>
+      <path d="M0 292 Q130 236 270 286 T560 268 V360 H0z" fill="#a9d6bd"/>
+      <rect y="316" width="560" height="44" fill="var(--soft)"/>
+      <use href="#cr" transform="translate(330,190) scale(1.2)"/>
+      <g transform="translate(14,82) scale(2.1)"><use href="#ex-base"/><g><animateTransform attributeName="transform" type="rotate" values="-3 118 66;5 118 66;-3 118 66" dur="7s" repeatCount="indefinite" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1" keyTimes="0;.5;1"/><use href="#ex-arm"/></g></g>
+    </svg>
+  </div>
+  <div class="facts" id="facts" aria-label="Коротко о нас"></div>
+
+  <section id="park">
+    <div class="eyebrow">Популярное</div>
+    <h2>Техника в наличии</h2>
+    <p class="lead">Нажмите на технику: покажем, когда она свободна, прикинем стоимость на ваши даты и примем заявку.</p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section id="how">
+    <div class="eyebrow">Порядок работы</div>
+    <h2>Как арендовать</h2>
+    <p class="lead" id="howLead"></p>
+    <div class="steps" id="steps"></div>
+  </section>
+
+  <section id="terms">
+    <div class="eyebrow">Условия</div>
+    <h2>Цена и скидки</h2>
+    <p class="lead">Чем дольше срок, тем дешевле сутки.</p>
+    <div class="terms">
+      <table><thead><tr><th>Срок аренды</th><th>Скидка</th></tr></thead><tbody id="discRows"></tbody></table>
+      <ul class="plain" id="termsList"></ul>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="eyebrow">Вопросы</div>
+    <h2>Частые вопросы</h2>
+    <p class="lead">Если не нашли ответ, позвоните нам.</p>
+    <div id="faqList"></div>
+  </section>
+
+  <section id="order">
+    <div class="contact">
+      <div>
+        <div class="eyebrow">Обратная связь</div>
+        <h2>Не знаете, что выбрать?</h2>
+        <p class="lead">Оставьте телефон, и мы перезвоним, зададим пару вопросов и подберём технику под вашу задачу. Это бесплатно.</p>
+        <div class="small">Позвоните нам</div>
+        <div class="big-phone js-phone"></div>
+        <div class="small" id="hours"></div>
+        <div class="base" id="baseBox" hidden><div class="small">Адрес</div><b class="js-addr"></b></div>
+      </div>
+      <form id="f" novalidate>
+        <div class="field"><label for="n">Имя</label><input id="n" type="text" autocomplete="name" placeholder="Иван"></div>
+        <div class="field"><label for="p">Телефон</label><input id="p" type="tel" autocomplete="tel" placeholder="+7 900 000-00-00"></div>
+        <div class="field"><label for="c">Что нужно сделать (по желанию)</label><textarea id="c" rows="3" placeholder="Например: выкопать котлован 10×20 м, глубина 3 м"></textarea></div>
+        <input class="hp" id="hp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="msg err" id="e" role="alert"></p>
+        <p class="msg ok" id="ok" role="status"></p>
+        <button class="btn" type="submit">Перезвоните мне</button>
+      </form>
+    </div>
+  </section>
+
+  <footer><span id="footBrand"></span><span id="footNote"></span></footer>
+</div>
+
+<script src="data/config.js" charset="utf-8"></script>
+<script src="js/store.js" charset="utf-8"></script>
+<script src="js/app.js" charset="utf-8"></script>
+</body>
+</html>

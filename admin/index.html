@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Админка</title>
+<style>
+:root{--ink:#10201a;--muted:#54655c;--line:#dbe4df;--soft:#f2f6f4;--accent:#178a4c;--bad:#b3261e;--warn:#b26a00}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--soft);color:var(--ink)}
+a{color:var(--accent)}
+button{font:inherit;padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer}
+button:hover:not(:disabled){border-color:var(--ink)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.link{border:0;background:none;padding:2px 0;color:var(--bad)}
+header{position:sticky;top:0;z-index:6;display:flex;gap:10px;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line);height:56px}
+header b{margin-right:auto}
+#state{font-size:13px;color:var(--muted)} #state.dirty{color:var(--warn);font-weight:600}
+#msg{font-size:13px}
+.shell{display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;max-width:1100px;margin:0 auto;padding:16px 16px 90px}
+@media(min-width:1200px){body.pvOn .shell{margin-left:max(0px,calc(50% - 550px - 210px));margin-right:440px}}
+.side{position:sticky;top:72px;align-self:start;display:grid;gap:2px}
+.side h4{margin:14px 8px 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.side h4:first-child{margin-top:0}
+.side button{text-align:left;border:0;background:none;padding:9px 12px;border-radius:8px;display:flex;justify-content:space-between;gap:8px}
+.side button:hover{background:#fff}
+.side button.on{background:var(--ink);color:#fff;font-weight:600}
+.side .n{display:inline-block;min-width:20px;padding:0 6px;border-radius:99px;background:var(--accent);color:#fff;font-size:12px;text-align:center}
+#tabSel{display:none}
+main{min-width:0;max-width:760px}
+h2{margin:0 0 4px;font-size:22px}
+h3{margin:20px 0 4px;font-size:15px}
+.lead{margin:0 0 14px;color:var(--muted)}
+label{display:block;font-size:13px;color:var(--muted);margin:8px 0}
+input,select,textarea{display:block;width:100%;margin-top:3px;padding:8px 10px;font:inherit;color:var(--ink);border:1px solid var(--line);border-radius:8px;background:#fff}
+.row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.row>label{flex:1 1 140px;margin:4px 0}
+.row>button{margin-bottom:4px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.card img{max-width:100%;max-height:170px;border-radius:8px;display:block;margin-bottom:6px}
+details.card{padding:0}
+details.card>summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none;display:flex;gap:10px;align-items:center}
+details.card>summary::before{content:"▸";color:var(--muted)}
+details.card[open]>summary::before{content:"▾"}
+details.card>summary small{margin-left:auto;font-weight:400;color:var(--muted)}
+details.card>.in{padding:0 16px 14px;border-top:1px solid var(--line)}
+.small{font-size:13px;color:var(--muted)}
+.ok{color:var(--accent)}.err{color:var(--bad)}
+.step{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.step.done{border-color:var(--accent)}
+.step h3{margin:0 0 6px;display:flex;gap:10px;align-items:center;font-size:16px}
+.step h3 i{font-style:normal;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:13px;flex:none}
+.step.done h3 i{background:var(--accent)}
+.step ol{margin:6px 0 10px;padding-left:20px}
+.step li{margin:3px 0}
+.chats button{margin:4px 6px 0 0}
+pre{background:var(--soft);padding:10px;border-radius:8px;overflow:auto;max-height:200px;font-size:12px}
+#login{max-width:340px;margin:18vh auto;padding:0 16px}
+.pv{display:none;position:fixed;top:56px;right:0;bottom:0;width:min(430px,100%);background:#fff;border-left:1px solid var(--line);z-index:5;flex-direction:column}
+body.pvOn .pv{display:flex}
+.pv .bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line)}
+.pv .bar b{margin-right:auto}
+.pv iframe{flex:1;width:100%;border:0}
+@media(max-width:800px){
+  .shell{grid-template-columns:minmax(0,1fr);padding-top:10px}
+  .side{display:none}
+  #tabSel{display:block;margin:0 0 12px;font-weight:600;font-size:16px}
+  header{height:auto;flex-wrap:wrap;padding:8px 12px}
+  #state{order:5;flex-basis:100%}
+}
+</style>
+</head>
+<body>
+<div id="login" hidden>
+  <h2>Вход в админку</h2>
+  <label>Пароль<input id="pw" type="password" autocomplete="current-password"></label>
+  <button class="pri" id="go">Войти</button>
+  <p class="err" id="lerr" role="alert"></p>
+  <p class="small" id="lhint">Пароль по умолчанию: <b>admin</b>.</p>
+</div>
+<div id="app" hidden>
+  <header>
+    <b>Админка</b><span id="msg" role="status"></span><span id="state"></span>
+    <button id="pvBtn">Предпросмотр</button>
+    <button class="pri" id="save">Сохранить</button>
+  </header>
+  <div class="shell">
+    <nav class="side" id="tabs" aria-label="Разделы админки"></nav>
+    <div><select id="tabSel" aria-label="Раздел"></select><main id="view"></main></div>
+  </div>
+  <aside class="pv" aria-label="Предпросмотр сайта">
+    <div class="bar"><b>Как выглядит сайт</b><a href="../index.html" target="_blank">Открыть отдельно</a><button id="pvClose">Закрыть</button></div>
+    <iframe id="pvFrame" title="Предпросмотр сайта"></iframe>
+  </aside>
+</div>
+<script src="../data/config.js" charset="utf-8"></script>
+<script src="../js/store.js" charset="utf-8"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var S = { cfg: null, orders: [], open: {} }, tab = "head", dirty = false;
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var get = function (o, p) { return p.split(".").reduce(function (a, k) { return a == null ? a : a[k]; }, o); };
+  var set = function (o, p, v) { var k = p.split("."), l = k.pop(); k.reduce(function (a, x) { return a[x]; }, o)[l] = v; };
+  var iso = function (d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  function msg(t, cls) { var m = $("msg"); m.textContent = t || ""; m.className = cls || ""; }
+  function touch(on) { dirty = on !== false; $("state").textContent = dirty ? "Есть несохранённые изменения" : "Всё сохранено"; $("state").className = dirty ? "dirty" : ""; }
+  var src = function (p) { return /^(data:|https?:|\/)/.test(p) ? p : "../" + p; };
+
+  // ---------- Файлы
+  function fileSave(name, text, type) {
+    var a = document.createElement("a"), u = URL.createObjectURL(new Blob([text], { type: type }));
+    a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
+  }
+
+  // ---------- Поля. Путь вида "brand.name" или "items.0.specs.1.0" связывает поле с данными.
+  var inp = function (p, label, type, ph) { return '<label>' + label + '<input type="' + (type || "text") + '" data-p="' + p + '"' + (ph ? ' placeholder="' + esc(ph) + '"' : "") + ' value="' + esc(get(S.cfg, p)) + '"></label>'; };
+  var area = function (p, label) { return '<label>' + label + '<textarea rows="3" data-p="' + p + '">' + esc(get(S.cfg, p)) + '</textarea></label>'; };
+  function list(p, fields, addLabel) {
+    var rows = get(S.cfg, p).map(function (r, i) {
+      var cells = fields.map(function (f) { return inp(p + "." + i + "." + f[0], f[1], f[2]); }).join("");
+      return '<div class="row">' + cells + '<button data-del="' + p + '" data-i="' + i + '" aria-label="Удалить строку">Удалить</button></div>';
+    }).join("");
+    return rows + '<button data-add="' + p + '">' + (addLabel || "Добавить строку") + '</button>';
+  }
+  function strs(p, label, addLabel) {
+    var rows = get(S.cfg, p).map(function (_, i) { return '<div class="row">' + inp(p + "." + i, label) + '<button data-del="' + p + '" data-i="' + i + '">Удалить</button></div>'; }).join("");
+    return rows + '<button data-add="' + p + '">' + (addLabel || "Добавить строку") + '</button>';
+  }
+  var NEW = {
+    items: function () { return { name: "Новая техника", chip: "", image: "", art: "ex", price: 0, operator: null, specs: [["", ""], ["", ""]], booked: [] }; },
+    specs: function () { return ["", ""]; }, booked: function () { return ["", ""]; },
+    facts: function () { return { value: "", label: "" }; }, discounts: function () { return { from: 7, pct: 5 }; },
+    steps: function () { return { title: "", text: "" }; }, faq: function () { return { q: "", a: "" }; }, notes: function () { return ""; }
+  };
+  var ART = [["ex", "Экскаватор"], ["mini", "Мини-экскаватор"], ["lo", "Погрузчик"], ["cr", "Кран"], ["pu", "Бетононасос"], ["ge", "Генератор"]];
+  function photo(path, holder) {
+    return (path ? '<img src="' + esc(src(path)) + '" alt="">' : '<p class="small">Фото нет, на сайте показывается рисунок.</p>') +
+      '<label>Загрузить фото (любого размера, сожмём сами)<input type="file" accept="image/*" data-up="' + holder + '"></label>' +
+      (path ? '<button data-clear="' + holder + '">Убрать фото</button>' : "");
+  }
+  var head = function (t, hint) { return '<h2>' + t + '</h2>' + (hint ? '<p class="lead">' + hint + '</p>' : ""); };
+
+  // ---------- Разделы: сначала блоки сайта в том же порядке, как на странице, потом управление
+  var TABS = [
+    ["Блоки сайта"],
+    ["head", "Шапка", "#top"], ["hero", "Первый экран", "#top"], ["items", "Техника", "#park"], ["steps", "Как арендовать", "#how"],
+    ["prices", "Цены и скидки", "#terms"], ["faq", "Вопросы", "#faq"], ["contacts", "Контакты и подвал", "#order"],
+    ["Управление"],
+    ["orders", "Заявки", ""], ["tg", "Telegram", ""]
+  ];
+  var VIEWS = {
+    head: function () {
+      return head("Шапка", "Название и слоган вверху сайта и во вкладке браузера.") + inp("brand.name", "Название компании") + inp("brand.tagline", "Слоган");
+    },
+    hero: function () {
+      return head("Первый экран", "Большой заголовок, текст, картинка и блоки под ними.") +
+        inp("hero.title", "Заголовок") + area("hero.text", "Текст под заголовком") +
+        '<h3>Картинка</h3>' + photo(S.cfg.hero.image, "hero") +
+        '<h3>Блоки под первым экраном</h3>' + list("facts", [["value", "Крупный текст"], ["label", "Подпись"]], "Добавить блок");
+    },
+    items: function () {
+      return head("Техника", "Карточки на сайте. Нажмите на название, чтобы раскрыть и изменить.") + S.cfg.items.map(function (it, i) {
+        var b = "items." + i, op = it.operator;
+        return '<details class="card" data-open="' + i + '"' + (S.open[i] ? " open" : "") + '><summary>' + esc(it.name || "Без названия") + '<small>' + (+it.price ? Math.round(it.price).toLocaleString("ru-RU") + " ₽/сут" : "цена не указана") + '</small></summary><div class="in">' +
+          photo(it.image, i) + inp(b + ".name", "Название") +
+          '<div class="row">' + inp(b + ".chip", "Подпись на фото (например, 20 т)") + inp(b + ".price", "Цена за сутки", "number") + '</div>' +
+          '<div class="row"><label>Оператор<select data-op="' + i + '"><option value="none"' + (!op ? " selected" : "") + '>нет</option><option value="optional"' + (op && !op.required ? " selected" : "") + '>по желанию</option><option value="required"' + (op && op.required ? " selected" : "") + '>обязателен</option></select></label>' + (op ? inp(b + ".operator.price", "Оператор, за смену", "number") : "") + '</div>' +
+          '<label>Рисунок, если нет фото<select data-p="' + b + '.art">' + ART.map(function (a) { return '<option value="' + a[0] + '"' + (it.art === a[0] ? " selected" : "") + '>' + a[1] + '</option>'; }).join("") + '</select></label>' +
+          '<h3>Характеристики</h3><p class="small">Нужно минимум две: первые две видны в карточке.</p>' + list(b + ".specs", [["0", "Название"], ["1", "Значение"]]) +
+          '<h3>Когда занята</h3><p class="small">Эти даты зачёркиваются в календаре.</p>' + list(b + ".booked", [["0", "С", "date"], ["1", "По", "date"]], "Добавить период") +
+          '<p><button class="link" data-del="items" data-i="' + i + '">Удалить эту технику</button></p></div></details>';
+      }).join("") + '<button class="pri" data-add="items">Добавить технику</button>';
+    },
+    steps: function () {
+      return head("Как арендовать", "Шаги от заявки до возврата техники.") + list("steps", [["title", "Заголовок"], ["text", "Текст"]], "Добавить шаг");
+    },
+    prices: function () {
+      return head("Цены и скидки", "Таблица скидок, условия доставки и список условий под ней.") +
+        '<h3>Скидки за срок</h3>' + list("discounts", [["from", "От скольких суток", "number"], ["pct", "Скидка, %", "number"]], "Добавить скидку") +
+        '<h3>Доставка</h3><div class="row">' + inp("delivery.base", "Базовая цена", "number") + inp("delivery.perKm", "За километр", "number") + inp("delivery.maxKm", "Километров для расчёта «до»", "number") + '</div>' +
+        '<h3>Условия</h3>' + strs("notes", "Условие", "Добавить условие");
+    },
+    faq: function () {
+      return head("Частые вопросы", "Вопросы и ответы внизу страницы.") + list("faq", [["q", "Вопрос"], ["a", "Ответ"]], "Добавить вопрос");
+    },
+    contacts: function () {
+      return head("Контакты и подвал", "Телефон, адрес и часы работы показываются в шапке и в блоке «Не знаете, что выбрать?».") +
+        inp("brand.phone", "Телефон") + inp("brand.hours", "Часы работы") + inp("brand.address", "Адрес") + inp("footer", "Подпись в самом низу страницы");
+    },
+    orders: function () {
+      return head("Заявки", "Заявки, оставленные на сайте в этом браузере. Заявки с других устройств приходят только в Telegram.") + (S.orders.length ? '<button data-act="clearOrders">Очистить список</button>' : "") + (S.orders.length ? S.orders.map(function (o) {
+        return '<div class="card"><b>' + (o.type === "order" ? esc(o.item) : "Просьба перезвонить") + '</b> <span class="small">' + new Date(o.time).toLocaleString("ru-RU") + '</span><br>' +
+          esc(o.name) + ', <a href="tel:' + esc(o.phone) + '">' + esc(o.phone) + '</a>' +
+          (o.type === "order" ? '<br>' + esc(o.from) + " – " + esc(o.to) + ", " + o.days + " сут., " + esc(o.est) : "") + (o.note ? '<br>' + esc(o.note) : "") +
+          '<br><span class="small ' + (o.sent ? "ok" : "err") + '">' + (o.sent ? "Отправлено в Telegram" : "В Telegram не отправлено: " + esc(o.error)) + '</span></div>';
+      }).join("") : '<p>Заявок пока нет. Когда клиент отправит форму на сайте, она появится здесь.</p>');
+    },
+    tg: function () {
+      return head("Заявки в Telegram", "") +
+        inp("orders.chatId", "ID чата (несколько через запятую)", "text", "например 123456789") +
+        '<p class="small">Не забудьте нажать «Сохранить».</p>' +
+        '<div class="card"><h3 style="margin-top:0">Проверка</h3><p class="small">Сначала сохраните, затем на опубликованном сайте нажмите кнопку: в Telegram придёт тестовая заявка.</p>' +
+        '<button class="pri" data-act="tgTest">Отправить тестовую заявку</button> <span id="o1" class="small"></span></div>';
+    }
+  };
+  function nav() {
+    var h = "", sel = "";
+    TABS.forEach(function (t) {
+      if (t.length === 1) { h += "<h4>" + t[0] + "</h4>"; sel += (sel ? "</optgroup>" : "") + '<optgroup label="' + t[0] + '">'; return; }
+      var n = t[0] === "orders" && Store.orders().length ? ' <span class="n">' + Store.orders().length + "</span>" : "";
+      h += '<button data-tab="' + t[0] + '"' + (t[0] === tab ? ' class="on"' : "") + ">" + t[1] + n + "</button>";
+      sel += '<option value="' + t[0] + '"' + (t[0] === tab ? " selected" : "") + ">" + t[1] + "</option>";
+    });
+    $("tabs").innerHTML = h; $("tabSel").innerHTML = sel + "</optgroup>";
+  }
+  function render() { nav(); $("view").innerHTML = VIEWS[tab](); }
+  function preview(reload) {
+    if (!document.body.classList.contains("pvOn")) return;
+    var t = TABS.filter(function (x) { return x[0] === tab; })[0], hash = (t && t[2]) || "";
+    var f = $("pvFrame");
+    if (reload || !f.getAttribute("src")) f.src = "../index.html?v=" + Date.now() + hash; else if (hash) f.src = f.src.replace(/#.*$/, "") + hash;
+  }
+  function go(t) {
+    tab = t; msg("");
+    if (t === "orders") S.orders = Store.orders();
+    render(); window.scrollTo(0, 0); preview(false);
+  }
+
+  // ---------- Фото: уменьшаем в браузере и храним прямо в данных (data-URL)
+  async function upload(file) {
+    var bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+    var k = Math.min(1, 1400 / Math.max(bmp.width, bmp.height)), c = document.createElement("canvas");
+    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    var x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(bmp, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", 0.8);
+  }
+
+  // ---------- Действия
+  document.addEventListener("input", function (e) {
+    var p = e.target.dataset.p; if (!p) return;
+    set(S.cfg, p, e.target.type === "number" ? (e.target.value === "" ? "" : +e.target.value) : e.target.value); touch();
+  });
+  document.addEventListener("toggle", function (e) { var d = e.target; if (d.dataset && d.dataset.open !== undefined) S.open[d.dataset.open] = d.open; }, true);
+  document.addEventListener("change", async function (e) {
+    var t = e.target, d = t.dataset;
+    if (t.id === "tabSel") return go(t.value);
+    if (d.up !== undefined && t.files[0]) {
+      msg("Загружаю фото…");
+      try {
+        var path = await upload(t.files[0]);
+        if (d.up === "hero") S.cfg.hero.image = path; else { S.cfg.items[+d.up].image = path; S.open[d.up] = true; }
+        touch(); msg("Фото загружено. Нажмите «Сохранить».", "ok"); render();
+      } catch (err) { msg("Не удалось загрузить фото: " + err.message, "err"); }
+    }
+    if (d.imp !== undefined && t.files[0]) {
+      try {
+        var txt = await t.files[0].text(), m = /^[\s\S]*?TEHPARK_DEFAULT\s*=\s*([\s\S]*?);?\s*$/.exec(txt), cfg = JSON.parse(m ? m[1] : txt);
+        if (!cfg.brand || !Array.isArray(cfg.items)) throw new Error("неверная структура");
+        S.cfg = norm(cfg); touch(); render(); msg("Файл загружен. Нажмите «Сохранить», чтобы применить.", "ok");
+      } catch (err) { msg("Не удалось прочитать файл: " + err.message, "err"); }
+    }
+    if (d.op !== undefined) {
+      var it = S.cfg.items[+d.op];
+      it.operator = t.value === "none" ? null : { price: it.operator ? it.operator.price : 0, required: t.value === "required" };
+      S.open[d.op] = true; touch(); render();
+    }
+  });
+  document.addEventListener("click", async function (e) {
+    var t = e.target.closest("button"); if (!t) return; var d = t.dataset;
+    if (d.tab) return go(d.tab);
+    if (d.add) { get(S.cfg, d.add).push(NEW[d.add.split(".").pop()]()); if (d.add === "items") S.open[S.cfg.items.length - 1] = true; touch(); return render(); }
+    if (d.del) { if (d.del === "items" && !confirm("Удалить эту технику?")) return; get(S.cfg, d.del).splice(+d.i, 1); if (d.del === "items") S.open = {}; touch(); return render(); }
+    if (d.clear) { if (d.clear === "hero") S.cfg.hero.image = ""; else S.cfg.items[+d.clear].image = ""; touch(); return render(); }
+    if (d.act) return act(d.act);
+    if (t.id === "save") return save();
+    if (t.id === "pvBtn") { document.body.classList.toggle("pvOn"); preview(true); return; }
+    if (t.id === "pvClose") { document.body.classList.remove("pvOn"); return; }
+  });
+  function out(id, text, cls) { var o = $(id); if (o) { o.textContent = text; o.className = cls || "small"; } }
+  async function act(a) {
+    if (a === "export") { fileSave("config.js", "window.TEHPARK_DEFAULT = " + JSON.stringify(S.cfg, null, 2) + ";\n", "text/javascript"); return; }
+    if (a === "reset") { if (confirm("Удалить все правки из браузера и вернуть исходные данные?")) { Store.resetConfig(); S.cfg = norm(Store.defaults()); touch(false); render(); preview(true); msg("Сброшено к исходным данным.", "ok"); } return; }
+    if (a === "clearOrders") { if (confirm("Удалить все заявки из этого браузера?")) { Store.clearOrders(); S.orders = []; render(); nav(); } return; }
+    if (a === "pw") {
+      var np = $("newPw").value, o = $("dataOut");
+      if (np.length < 4) { o.className = "err"; o.textContent = "Пароль не короче 4 символов."; return; }
+      Store.setPwHash(await Store.hash(np)); $("newPw").value = ""; o.className = "ok"; o.textContent = "Пароль изменён (для этого браузера)."; return;
+    }
+    if (a === "tgTest") {
+      out("o1", "Отправляю…");
+      try {
+        var res = await fetch("/api/order", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "callback", name: "Тест из админки", phone: "+7 000 000-00-00", note: "Проверка подключения", chatId: String((S.cfg.orders || {}).chatId || "").trim() }) });
+        var j = await res.json().catch(function () { return {}; });
+        if (!res.ok || !j.ok) throw new Error(j.error || ("ответ " + res.status));
+        out("o1", "Готово: тестовая заявка ушла в Telegram.", "ok");
+      } catch (err) { out("o1", "Не получилось: " + err.message + ". Проверка работает только на опубликованном сайте. Проверьте ID чата и переменную BOT_TOKEN в Vercel.", "err"); }
+    }
+  }
+  function save() {
+    var c = JSON.parse(JSON.stringify(S.cfg)), i, it;
+    for (i = 0; i < c.items.length; i++) {
+      it = c.items[i];
+      it.specs = it.specs.filter(function (s) { return s[0] || s[1]; });
+      it.booked = it.booked.filter(function (b) { return b[0] && b[1]; });
+      if (!it.name) { S.open[i] = true; go("items"); return msg("Техника №" + (i + 1) + ": введите название.", "err"); }
+      if (!(it.price > 0)) { S.open[i] = true; go("items"); return msg("«" + it.name + "»: укажите цену за сутки.", "err"); }
+      if (it.specs.length < 2) { S.open[i] = true; go("items"); return msg("«" + it.name + "»: нужно минимум две характеристики.", "err"); }
+      if (it.booked.some(function (b) { return b[0] > b[1]; })) { S.open[i] = true; go("items"); return msg("«" + it.name + "»: в занятых датах начало позже конца.", "err"); }
+    }
+    c.discounts = c.discounts.filter(function (x) { return x.from > 0; }).sort(function (a, b) { return a.from - b.from; });
+    c.notes = c.notes.filter(Boolean);
+    if (!Store.saveConfig(c)) return msg("Не хватило места в браузере: уменьшите или уберите часть фото.", "err");
+    S.cfg = c; touch(false); msg("Сохранено", "ok"); render(); preview(true);
+    setTimeout(function () { if ($("msg").textContent === "Сохранено") msg(""); }, 2500);
+  }
+
+  // ---------- Вход и запуск
+  function norm(c) {
+    c.items.forEach(function (it) {
+      it.booked = (it.booked || []).map(function (b) { return b.map(function (x) { return typeof x === "number" ? iso(new Date(Date.now() + x * 864e5)) : x; }); });
+      it.specs = it.specs || []; it.art = it.art || "ex"; it.image = it.image || "";
+    });
+    c.hero = c.hero || {}; c.footer = c.footer || ""; c.notes = c.notes || []; c.orders = { endpoint: "/api/order", chatId: String((c.orders || {}).chatId || "") }; c.brand.address = c.brand.address || "";
+    return c;
+  }
+  function showLogin() { $("app").hidden = true; $("login").hidden = false; $("pw").focus(); }
+  async function login() {
+    $("lerr").textContent = "";
+    var h = await Store.hash($("pw").value), ok = h === (Store.pwHash() || await Store.hash(Store.DEFAULT_PW));
+    if (!ok) { $("lerr").textContent = "Неверный пароль"; return; }
+    $("pw").value = ""; Store.setSession(true); start();
+  }
+  $("go").onclick = login;
+  $("pw").onkeydown = function (e) { if (e.key === "Enter") login(); };
+  $("lhint").hidden = !!Store.pwHash();
+  window.addEventListener("beforeunload", function (e) { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+  function start() {
+    if (!Store.session()) return showLogin();
+    S.cfg = norm(Store.config());
+    $("login").hidden = true; $("app").hidden = false; touch(false); render();
+  }
+  start();
+})();
+</script>
+</body>
+</html>
